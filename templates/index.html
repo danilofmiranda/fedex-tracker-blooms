@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>FedEx Tracker - BloomsPal SonIA</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+                .container { background: white; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); padding: 48px; max-width: 600px; width: 100%; }
+                .logo { text-align: center; margin-bottom: 32px; }
+                .logo h1 { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+                .logo span { color: #667eea; }
+                .logo p { color: #6b7280; font-size: 14px; margin-top: 8px; }
+                .upload-area { border: 2px dashed #d1d5db; border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: #f9fafb; }
+                .upload-area:hover { border-color: #667eea; background: #f0f4ff; }
+                .upload-area.dragover { border-color: #667eea; background: #e8edff; transform: scale(1.02); }
+                .upload-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+                .upload-area h3 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px; }
+                .upload-area p { color: #6b7280; font-size: 14px; margin-bottom: 16px; }
+                .upload-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+                #fileInput { display: none; }
+                .file-info { display: none; margin-top: 24px; padding: 16px; background: #f0fdf4; border-radius: 12px; border: 1px solid #86efac; }
+                .file-info.show { display: flex; align-items: center; gap: 12px; }
+                .file-info .file-name { flex: 1; font-weight: 500; color: #166534; }
+                .file-info .remove-btn { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 20px; }
+                .process-btn { width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 24px; display: none; }
+                .process-btn.show { display: block; }
+                .process-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+                .loading { display: none; text-align: center; margin-top: 24px; }
+                .loading.show { display: block; }
+                .spinner { width: 48px; height: 48px; border: 4px solid #e5e7eb; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                .result { display: none; margin-top: 24px; padding: 24px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 16px; text-align: center; }
+                .result.show { display: block; }
+                .result.error { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); }
+                .result h3 { font-size: 20px; font-weight: 600; color: #166534; margin-bottom: 8px; }
+                .result.error h3 { color: #dc2626; }
+                .result p { color: #6b7280; margin-bottom: 16px; }
+                .download-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+                .footer { text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px; }
+            </style>
+  </head>
+  <body>
+        <div class="container">
+                  <div class="logo">
+                                <h1>📦 FedEx <span>Tracker</span></h1>
+                              <p>BloomsPal SonIA - Sistema de Rastreo Inteligente</p>
+                  </div>div>
+                <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📤</div>div>
+                            <h3>Sube tu archivo Excel</h3>
+                            <p>Arrastra y suelta o haz clic para seleccionar</p>
+                            <button class="upload-btn">Seleccionar Archivo</button>button>
+                            <input type="file" id="fileInput" accept=".xlsx,.xls">
+                </div>div>
+                <div class="file-info" id="fileInfo">
+                            <span>📄</span>
+                            <span class="file-name" id="fileName"></span>
+                            <button class="remove-btn" id="removeFile">&times;</button>button>
+                </div>div>
+                <button class="process-btn" id="processBtn">🚀 Procesar y Generar Reporte</button>button>
+                <div class="loading" id="loading">
+                            <div class="spinner"></div>div>
+                            <p>Consultando FedEx API... Por favor espera</p>
+                </div>div>
+                <div class="result" id="result">
+                            <h3 id="resultTitle"></h3>
+                            <p id="resultMessage"></p>
+                            <a class="download-btn" id="downloadBtn" href="#" download>📥 Descargar Reporte</a>a>
+                </div>div>
+                <div class="footer">
+                            <p>Desarrollado para BloomsPal | Powered by FedEx Track API</p>
+                </div>div>
+        </div>div>
+      <script>
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                const removeFile = document.getElementById('removeFile');
+                const processBtn = document.getElementById('processBtn');
+                const loading = document.getElementById('loading');
+                const result = document.getElementById('result');
+                const resultTitle = document.getElementById('resultTitle');
+                const resultMessage = document.getElementById('resultMessage');
+                const downloadBtn = document.getElementById('downloadBtn');
+                let selectedFile = null;
+                uploadArea.addEventListener('click', () => fileInput.click());
+                uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+                uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+                uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+                fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
+                function handleFile(file) {
+                              if (!file.name.match(/\.(xlsx|xls)$/i)) { alert('Por favor selecciona un archivo Excel'); return; }
+                              selectedFile = file;
+                              fileName.textContent = file.name;
+                              fileInfo.classList.add('show');
+                              processBtn.classList.add('show');
+                              result.classList.remove('show');
+                }
+                removeFile.addEventListener('click', (e) => { e.stopPropagation(); selectedFile = null; fileInput.value = ''; fileInfo.classList.remove('show'); processBtn.classList.remove('show'); });
+                processBtn.addEventListener('click', async () => {
+                              if (!selectedFile) return;
+                              processBtn.disabled = true;
+                              loading.classList.add('show');
+                              result.classList.remove('show');
+                              const formData = new FormData();
+                              formData.append('file', selectedFile);
+                              try {
+                                                const response = await fetch('/api/track', { method: 'POST', body: formData });
+                                                if (response.ok) {
+                                                                      const blob = await response.blob();
+                                                                      const url = URL.createObjectURL(blob);
+                                                                      downloadBtn.href = url;
+                                                                      downloadBtn.download = 'FedEx_Report_SonIA.xlsx';
+                                                                      resultTitle.textContent = '✅ Reporte Generado!';
+                                                                      resultMessage.textContent = 'Tu archivo esta listo';
+                                                                      result.classList.remove('error');
+                                                                      result.classList.add('show');
+                                                                      downloadBtn.click();
+                                                } else {
+                                                                      const error = await response.json();
+                                                                      throw new Error(error.detail || 'Error procesando');
+                                                }
+                              } catch (error) {
+                                                resultTitle.textContent = '❌ Error';
+                                                resultMessage.textContent = error.message;
+                                                result.classList.add('error', 'show');
+                                                downloadBtn.style.display = 'none';
+                              } finally {
+                                                loading.classList.remove('show');
+                                                processBtn.disabled = false;
+                              }
+                });
+      </script>
+  </body>
+</html>html>
+      </script></p></p></span></h1>
+  </body>
+      </style></title>
+  </head>
